@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-type ConsumerBody struct {
+type consumerBody struct {
 	*Config
 	Body []byte
 }
@@ -20,15 +20,15 @@ type Consumer struct {
 	Tags     *[]string `json:"tags,omitempty"`
 }
 
-func (c *Config) Consumer(consumer *Consumer) *ConsumerBody {
+func (c *Config) Consumer(consumer *Consumer) *consumerBody {
 	consumerByte, _ := json.Marshal(consumer)
-	return &ConsumerBody{
+	return &consumerBody{
 		Config: c,
 		Body:   consumerByte,
 	}
 }
 
-func (c *ConsumerBody) Add() (err error) {
+func (c *consumerBody) Add() (err error) {
 	url := fmt.Sprintf("%s/consumers", c.Config.Url)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(c.Body))
 	if err != nil {

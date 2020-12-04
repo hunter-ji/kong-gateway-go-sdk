@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-type RouteBody struct {
+type routeBody struct {
 	*Config
 	Services map[string]string
 	Body     []byte
@@ -36,16 +36,16 @@ type Route struct {
 	Service                 map[string]string `json:"service"`
 }
 
-func (c *Config) Route(route *Route) *RouteBody {
+func (c *Config) Route(route *Route) *routeBody {
 	routeByte, _ := json.Marshal(route)
-	return &RouteBody{
+	return &routeBody{
 		Config:   c,
 		Services: route.Service,
 		Body:     routeByte,
 	}
 }
 
-func (r *RouteBody) Add() (err error) {
+func (r *routeBody) Add() (err error) {
 
 	var services string
 	if r.Services["id"] != "" {

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type ServicesBody struct {
+type servicesBody struct {
 	*Config
 	Body []byte
 }
@@ -31,16 +31,16 @@ type Services struct {
 	Url               string         `json:"url,omitempty"`
 }
 
-func (c *Config) Services(services *Services) *ServicesBody {
+func (c *Config) Services(services *Services) *servicesBody {
 
 	servicesByte, _ := json.Marshal(services)
-	return &ServicesBody{
+	return &servicesBody{
 		Config: c,
 		Body:   servicesByte,
 	}
 }
 
-func (r *ServicesBody) Add() (err error) {
+func (r *servicesBody) Add() (err error) {
 
 	resp, err := http.Post(r.Config.Url+"/services", "application/json", bytes.NewBuffer(r.Body))
 	if err != nil {

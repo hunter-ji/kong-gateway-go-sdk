@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type PluginKeyAuthBody struct {
+type pluginKeyAuthBody struct {
 	*Config
 	Consumer string
 	Key      string
@@ -19,15 +19,15 @@ type PluginKeyAuth struct {
 	Key      string
 }
 
-func (c *Config) PluginKeyAuth(auth *PluginKeyAuth) *PluginKeyAuthBody {
-	return &PluginKeyAuthBody{
+func (c *Config) PluginKeyAuth(auth *PluginKeyAuth) *pluginKeyAuthBody {
+	return &pluginKeyAuthBody{
 		Config:   c,
 		Consumer: auth.Consumer,
 		Key:      auth.Key,
 	}
 }
 
-func (p *PluginKeyAuthBody) CreateKey() (key string, err error) {
+func (p *pluginKeyAuthBody) CreateKey() (key string, err error) {
 
 	type Response struct {
 		Key string `json:"key"`
@@ -65,7 +65,7 @@ func (p *PluginKeyAuthBody) CreateKey() (key string, err error) {
 	return
 }
 
-func (p *PluginKeyAuthBody) DelKey() (err error) {
+func (p *pluginKeyAuthBody) DelKey() (err error) {
 	url := fmt.Sprintf("%s/consumers/%s/key-auth/%s", p.Config.Url, p.Consumer, p.Key)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
