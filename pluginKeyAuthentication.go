@@ -1,6 +1,7 @@
 package kong_gateway_go_sdk
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -26,7 +27,12 @@ func (c *Config) PluginKeyAuth(auth *PluginKeyAuth) *PluginKeyAuthBody {
 	}
 }
 
-func (p *PluginKeyAuthBody) CreateKey() (err error) {
+func (p *PluginKeyAuthBody) CreateKey() (key string, err error) {
+
+	type Response struct {
+		Key string `json:"key"`
+	}
+
 	url := fmt.Sprintf("%s/consumers/%s/key-auth", p.Config.Url, p.Consumer)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
@@ -36,19 +42,26 @@ func (p *PluginKeyAuthBody) CreateKey() (err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
 
-	if resp.Status != "201 Created" {
-		body, bodyErr := ioutil.ReadAll(resp.Body)
-		if bodyErr != nil {
-			err = bodyErr
-			return
-		}
-		err = errors.New(string(body))
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
 	}
 
+	if resp.Status != "201 Created" {
+		err = errors.New(string(body))
+		return
+	}
+
+	var res Response
+	if err = json.Unmarshal(body, &res); err != nil {
+		return
+	}
+
+	key = res.Key
 	return
 }
 
@@ -62,7 +75,7 @@ func (p *PluginKeyAuthBody) DelKey() (err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return
 	}
 	defer resp.Body.Close()
 
@@ -73,6 +86,7 @@ func (p *PluginKeyAuthBody) DelKey() (err error) {
 			return
 		}
 		err = errors.New(string(body))
+		return
 	}
 
 	return
