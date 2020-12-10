@@ -15,9 +15,10 @@ type consumerBody struct {
 }
 
 type Consumer struct {
-	Username string    `json:"username"`
-	CustomId string    `json:"custom_id"`
-	Tags     *[]string `json:"tags,omitempty"`
+	Username   string    `json:"username,omitempty"`
+	CustomId   string    `json:"custom_id,omitempty"`
+	ConsumerId string    `json:"consumer_id,omitempty"`
+	Tags       *[]string `json:"tags,omitempty"`
 }
 
 func (c *Config) Consumer(consumer *Consumer) *consumerBody {
@@ -28,7 +29,12 @@ func (c *Config) Consumer(consumer *Consumer) *consumerBody {
 	}
 }
 
-func (c *consumerBody) Add() (err error) {
+func (c *consumerBody) Add() (id string, err error) {
+
+	type Response struct {
+		Id string `json:"id"`
+	}
+
 	url := fmt.Sprintf("%s/consumers", c.Config.Url)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(c.Body))
 	if err != nil {
@@ -37,14 +43,56 @@ func (c *consumerBody) Add() (err error) {
 
 	defer resp.Body.Close()
 
-	if resp.Status != "201 Created" {
-		body, bodyErr := ioutil.ReadAll(resp.Body)
-		if bodyErr != nil {
-			err = bodyErr
-			return
-		}
-		err = errors.New(string(body))
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
 	}
 
+	if resp.StatusCode != 201 {
+		err = errors.New(string(body))
+		return
+	}
+
+	var res Response
+	if err = json.Unmarshal(body, &res); err != nil {
+		return
+	}
+
+	id = res.Id
+	return
+}
+
+func (c *consumerBody) Retrieve() (exist bool, err error) {
+
+	var consumerInfo Consumer
+	err = json.Unmarshal(c.Body, &consumerInfo)
+	if err != nil {
+		return
+	}
+
+	url := fmt.Sprintf("%s/consumers/%s", c.Config.Url, consumerInfo.ConsumerId)
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode == 404 {
+		exist = false
+		return
+	}
+
+	if resp.StatusCode != 200 {
+		err = errors.New(string(body))
+		return
+	}
+
+	exist = true
 	return
 }

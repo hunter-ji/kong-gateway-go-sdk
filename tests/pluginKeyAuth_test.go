@@ -9,7 +9,7 @@ import (
 
 func TestPluginAuthKeyCreate(t *testing.T) {
 	client := kongGatewayGoSdk.Connect(os.Getenv("KONG_URL"))
-	err := client.PluginKeyAuth(&kongGatewayGoSdk.PluginKeyAuth{Consumer: "jack"}).CreateKey()
+	_, err := client.PluginKeyAuth(&kongGatewayGoSdk.PluginKeyAuth{Consumer: "jack"}).CreateKey()
 	if err != nil {
 		t.Error(err)
 	}

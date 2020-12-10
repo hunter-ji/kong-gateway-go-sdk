@@ -49,7 +49,7 @@ func (r *servicesBody) Add() (err error) {
 
 	defer resp.Body.Close()
 
-	if resp.Status != "201 Created" {
+	if resp.StatusCode != 201 {
 		body, bodyErr := ioutil.ReadAll(resp.Body)
 		if bodyErr != nil {
 			err = bodyErr

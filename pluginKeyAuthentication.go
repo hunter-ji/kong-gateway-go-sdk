@@ -51,7 +51,7 @@ func (p *pluginKeyAuthBody) CreateKey() (key string, err error) {
 		return
 	}
 
-	if resp.Status != "201 Created" {
+	if resp.StatusCode != 201 {
 		err = errors.New(string(body))
 		return
 	}
@@ -66,6 +66,7 @@ func (p *pluginKeyAuthBody) CreateKey() (key string, err error) {
 }
 
 func (p *pluginKeyAuthBody) DelKey() (err error) {
+
 	url := fmt.Sprintf("%s/consumers/%s/key-auth/%s", p.Config.Url, p.Consumer, p.Key)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
@@ -79,7 +80,7 @@ func (p *pluginKeyAuthBody) DelKey() (err error) {
 	}
 	defer resp.Body.Close()
 
-	if resp.Status != "204 No Content" {
+	if resp.StatusCode != 204 {
 		body, bodyErr := ioutil.ReadAll(resp.Body)
 		if bodyErr != nil {
 			err = bodyErr
